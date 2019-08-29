@@ -57,6 +57,9 @@ func main() {
 		log.Fatalf("failed to find terser (minifier), make sure it installed")
 	}
 
+	cdn := fmt.Sprintf("https://cdn.jsdelivr.net/gh/wirebase/loader/%s.min.js", name)
+	boot = bytes.Replace(boot, []byte(`{{src}}`), []byte(cdn), 1)
+
 	buf := bytes.NewBuffer(nil)
 	cmd := exec.Command(exe)
 	cmd.Stdin = bytes.NewReader(boot)
@@ -67,8 +70,5 @@ func main() {
 		log.Fatalf("failed to minify boot script: %v", err)
 	}
 
-	cdn := fmt.Sprintf("https://cdn.jsdelivr.net/gh/wirebase/loader/%s.min.js", name)
-	boot = bytes.Replace(boot, []byte(`{{src}}`), []byte(cdn), 1)
-	fmt.Println(buf.String())
-	fmt.Printf(`<script src="data:text/javascript;base64,` + base64.URLEncoding.EncodeToString([]byte(boot)) + `" />` + "\n")
+	fmt.Printf(`<script src="data:text/javascript;base64,` + base64.URLEncoding.EncodeToString(buf.Bytes()) + `" />` + "\n")
 }
