@@ -1,9 +1,9 @@
 (function(){
   go = new Go();  
   
-  wasm = document.documentElement.dataset.tlMain
+  wasm = document.documentElement.dataset.wbMain
   if (!wasm) {
-    console.warn("loader: no Wasm file specified to load in the html element's data-tl-main attribute")
+    console.warn("loader: no Wasm file to load specified with the html element's data-wb-main attribute")
     return
   }
 
