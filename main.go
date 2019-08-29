@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -29,7 +31,8 @@ func main() {
 		log.Fatalf("failed to read loader javascript: %v", err)
 	}
 
-	if err = ioutil.WriteFile(runtime.Version()+".js", bytes.Join([][]byte{
+	name := runtime.Version()
+	if err = ioutil.WriteFile(name+".js", bytes.Join([][]byte{
 		morphdom,
 		axios,
 		wasmexec,
@@ -38,6 +41,7 @@ func main() {
 		log.Fatalf("failed to write loader javascript: %v", err)
 	}
 
-	// commit a release
-	// update the bootstrap js
+	cdn := fmt.Sprintf("https://cdn.jsdelivr.net/gh/wirebase/loader/%s.min.js", name)
+	bootstrap := fmt.Sprintf(`document.documentElement.className+=" wb-js","object"==typeof WebAssembly&&(document.documentElement.className+=" wb-wasm",window.addEventListener("DOMContentLoaded",function(e){el=document.createElement("script"),el.src="%s",document.body.appendChild(el)}));`, cdn)
+	fmt.Printf(`<script src="data:text/javascript;base64,` + base64.URLEncoding.EncodeToString([]byte(bootstrap)) + `" />` + "\n")
 }

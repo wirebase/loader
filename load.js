@@ -54,14 +54,14 @@
                 fraction = loaded/total
                 current = Math.trunc(fraction*10)
                 if (current > progress) {
-                  document.documentElement.classList.remove("tlprogress-"+progress.toString())
-                  document.documentElement.classList.add("tlprogress-"+current.toString())
+                  document.documentElement.classList.remove("wb-progress-"+progress.toString())
+                  document.documentElement.classList.add("wb-progress-"+current.toString())
                   progress = current
                 }
 
                 // emit a custom event so script can do something more powerfull if they want 
                 var event = document.createEvent('Event');
-                event.initEvent('tlprogress', true, true);
+                event.initEvent('wb-progress', true, true);
                 event.total = total 
                 event.loaded = loaded
                 document.documentElement.dispatchEvent(event)
@@ -83,13 +83,13 @@
       return response.arrayBuffer()
     })
     .then(function(bytes) {
-      document.documentElement.classList.remove("tlprogress-"+progress.toString())
-      document.documentElement.classList.add("tlprogress-10")
+      document.documentElement.classList.remove("wb-progress-"+progress.toString())
+      document.documentElement.classList.add("wb-progress-10")
       return WebAssembly.instantiate(bytes, go.importObject)
     })
     .then(function(result) {
       go.run(result.instance);
-      document.documentElement.classList.add("tlloaded")
+      document.documentElement.classList.add("wb-loaded")
     })
     .catch(function(error) {
       console.error("loader: failed to fetch, compile and run Wasm binary at '"+wasm+"': "+error)
