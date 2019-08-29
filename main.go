@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -31,13 +32,16 @@ func main() {
 		log.Fatalf("failed to read loader javascript: %v", err)
 	}
 
-	name := runtime.Version()
-	if err = ioutil.WriteFile(name+".js", bytes.Join([][]byte{
+	data := bytes.Join([][]byte{
 		morphdom,
 		axios,
 		wasmexec,
 		load,
-	}, nil), 0777); err != nil {
+	}, nil)
+
+	name := fmt.Sprintf("%.4x-%s", sha256.Sum256(data), runtime.Version())
+
+	if err = ioutil.WriteFile(name+".js", data, 0777); err != nil {
 		log.Fatalf("failed to write loader javascript: %v", err)
 	}
 
