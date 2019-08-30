@@ -2943,15 +2943,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 })();
 (function(){
-  go = new Go();  
+  var go = new Go();  
   
-  wasm = document.documentElement.dataset.tlMain
+  var wasm = document.documentElement.dataset.wbMain
   if (!wasm) {
-    console.warn("loader: no Wasm file specified to load in the html element's data-tl-main attribute")
+    console.warn("loader: no Wasm file to load specified with the html element's data-wb-main attribute")
     return
   }
 
-  fetch(wasm)
+  var cfg = {}
+  var cfgs = document.documentElement.dataset.wbLoadConfig
+  if (cfgs) {
+    try {
+      cfg = JSON.parse(cfgs);
+    } catch (e) {
+      console.error("loader: invalid JSON specified as loader configuration in html element's data-wb-load-config attribute")
+    }
+  }
+
+  var loaded = 0;
+  var progress = 0;
+
+  fetch(wasm, cfg)
     .then(function(response) {
       if (!response.body) { 
         console.warn('loader: ReadableStream not available on Wasm response, progress will not be shown.')
@@ -2969,17 +2982,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
         // else, if it's 'gzip' or 'brotli' encoded we're gonna estimate it based 
         // on average factors here: https://github.com/golang/go/wiki/WebAssembly#reducing-the-size-of-wasm-files
-        var enc = response.headers.get('content-encoding').toLowerCase()
-        if (enc.includes("gzip")) {
-          total = Math.trunc(total * (4.07)) // between 3.44 / 4.70
-        } else if(enc.includes("br")) {
-          total = Math.trunc(total * (5.65)) // 6.67 / 4.64
+        var ench = response.headers.get('content-encoding')
+        if (ench) {
+          
+          enc = ench.toLowerCase()
+          if (enc.includes("gzip")) {
+            total = Math.trunc(total * (4.07)) // between 3.44 / 4.70
+          } else if(enc.includes("br")) {
+            total = Math.trunc(total * (5.65)) // 6.67 / 4.64
+          }
         }
       }
 
       // start progress reporting
-      loaded = 0;
-      progress = 0;
       return new Response(
         new ReadableStream({
           start: function(controller) {
@@ -2995,8 +3010,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
                 // we keep a progress class for easy usage with HTML 
                 loaded += res.value.byteLength;
-                fraction = loaded/total
-                current = Math.trunc(fraction*10)
+                var current = Math.trunc((loaded/total)*10)
                 if (current > progress) {
                   document.documentElement.classList.remove("wb-progress-"+progress.toString())
                   document.documentElement.classList.add("wb-progress-"+current.toString())

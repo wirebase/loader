@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -41,24 +40,29 @@ func main() {
 		load,
 	}, nil)
 
-	name := fmt.Sprintf("%.4x-%s", sha256.Sum256(data), runtime.Version())
-
+	name := fmt.Sprintf("%s", runtime.Version())
 	if err = ioutil.WriteFile(name+".js", data, 0777); err != nil {
 		log.Fatalf("failed to write loader javascript: %v", err)
 	}
 
+	if err = ioutil.WriteFile("latest.js", data, 0777); err != nil {
+		log.Fatalf("failed to write latest loader javascript: %v", err)
+	}
+
+	// the boot file does minimal js, small enough to be in a data url executed in the header
 	boot, err := ioutil.ReadFile("boot.js")
 	if err != nil {
 		log.Fatalf("failed to read boot javascript: %v", err)
 	}
 
+	cdn := fmt.Sprintf("https://cdn.jsdelivr.net/gh/wirebase/loader/%s.min.js", name)
+	boot = bytes.Replace(boot, []byte(`./latest.js`), []byte(cdn), 1)
+
+	// use the terser binary to minify
 	exe, err := exec.LookPath("terser")
 	if err != nil {
 		log.Fatalf("failed to find terser (minifier), make sure it installed")
 	}
-
-	cdn := fmt.Sprintf("https://cdn.jsdelivr.net/gh/wirebase/loader/%s.min.js", name)
-	boot = bytes.Replace(boot, []byte(`{{src}}`), []byte(cdn), 1)
 
 	buf := bytes.NewBuffer(nil)
 	cmd := exec.Command(exe)
@@ -70,5 +74,7 @@ func main() {
 		log.Fatalf("failed to minify boot script: %v", err)
 	}
 
+	// output an example script tag that will do it all
+	fmt.Println(buf.String())
 	fmt.Printf(`<script src="data:text/javascript;base64,` + base64.URLEncoding.EncodeToString(buf.Bytes()) + `" />` + "\n")
 }

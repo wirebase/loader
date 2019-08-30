@@ -1,0 +1,29 @@
+{
+  "name": "wirebase-loader",
+  "version": "0.1.13",
+  "description": "Loads and runs a Wirebase app while allowing feedback for unsupported browsers and slow connections.",
+  "main": "load.js",
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "http-serve": "^1.0.1",
+    "install": "^0.13.0",
+    "jsdom": "^15.1.1",
+    "mocha": "^6.2.0",
+    "npm": "^6.11.2"
+  },
+  "scripts": {
+    "test": "mocha",
+    "start": "http-serve ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wirebase/loader.git"
+  },
+  "author": "Ad van der Veer",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/wirebase/loader/issues"
+  },
+  "homepage": "https://github.com/wirebase/loader#readme"
+}

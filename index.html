@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" data-wb-main="./main.wasm" data-wb-load-config="{&quot;mode&quot;: &quot;no-cors&quot;}">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mocha Tests</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css" />
+  </head>
+  <body>
+    <div id="mocha"></div>
+
+    <script src="https://unpkg.com/chai/chai.js"></script>
+    <script src="https://unpkg.com/mocha/mocha.js"></script>
+
+    <script class="mocha-init">
+      mocha.setup('bdd');
+      mocha.checkLeaks();
+    </script>
+    <script src="test.boot.js"></script>
+    <script src="boot.js"></script>
+    <script class="mocha-exec">
+      mocha.globals(['morphdom', 'axios', 'global', 'fs', 'Go']);
+      mocha.run();
+    </script>
+  </body>
+</html>
